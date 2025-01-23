@@ -1,254 +1,129 @@
-function MainComponent() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
-  const socialLinks = {
-    github: "https://github.com/yourusername",
-    discord: "https://discord.com/users/yourdiscordid",
-    linkedin: "https://linkedin.com/in/yourusername",
-  };
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メモリーマッチングゲーム</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
 
-    return () => clearInterval(timer);
-  }, []);
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 80px);
+            gap: 10px;
+        }
 
-  const formatTime = (date) => {
-    const options = {
-      timeZone: "Asia/Tokyo",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-    };
+        .card {
+            width: 80px;
+            height: 120px;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-    return new Intl.DateTimeFormat("ja-JP", options)
-      .format(date)
-      .replace(/\//g, "-")
-      .replace(/,/g, "");
-  };
+        .flipped, .matched {
+            background-color: #28a745;
+            color: white;
+            cursor: default;
+        }
 
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white font-inter">
-      <div className="fixed top-0 right-0 p-4 text-[#64ffda] text-lg z-50">
-        {formatTime(currentTime)}
-      </div>
-      <nav className="fixed w-full bg-[#0a0a0a]/80 backdrop-blur-sm z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold">Your Name</div>
-          <div className="hidden md:flex space-x-8">
-            <a href="#home" className="hover:text-[#64ffda] transition-colors">
-              ホーム
-            </a>
-            <a href="#about" className="hover:text-[#64ffda] transition-colors">
-              自己紹介
-            </a>
-            <a
-              href="#skills"
-              className="hover:text-[#64ffda] transition-colors"
-            >
-              スキル
-            </a>
-            <a
-              href="#contact"
-              className="hover:text-[#64ffda] transition-colors"
-            >
-              連絡先
-            </a>
-          </div>
-          <button
-            className="md:hidden text-2xl"
-            onClick={() => setShowMenu(true)}
-          >
-            <i className="fas fa-bars"></i>
-          </button>
-        </div>
-        {isMenuOpen && (
-          <div className="md:hidden absolute w-full bg-[#0a0a0a] border-t border-[#1a1a1a]">
-            <div className="flex flex-col items-center py-4 space-y-4">
-              <a
-                href="#home"
-                className="hover:text-[#64ffda] transition-colors"
-              >
-                ホーム
-              </a>
-              <a
-                href="#about"
-                className="hover:text-[#64ffda] transition-colors"
-              >
-                自己紹介
-              </a>
-              <a
-                href="#skills"
-                className="hover:text-[#64ffda] transition-colors"
-              >
-                スキル
-              </a>
-              <a
-                href="#contact"
-                className="hover:text-[#64ffda] transition-colors"
-              >
-                連絡先
-              </a>
-            </div>
-          </div>
-        )}
-      </nav>
+        .matched {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <h1>メモリーマッチングゲーム</h1>
+    <div id="game-board"></div>
 
-      {showMenu && (
-        <div className="fixed inset-0 bg-[#0a0a0a] z-50 flex items-center justify-center">
-          <button
-            onClick={() => setShowMenu(false)}
-            className="absolute top-6 right-6 text-2xl hover:text-[#64ffda]"
-          >
-            <i className="fas fa-times"></i>
-          </button>
-          <div className="text-center space-y-8">
-            <a
-              href="#home"
-              onClick={() => setShowMenu(false)}
-              className="block text-4xl hover:text-[#64ffda] transition-colors"
-            >
-              ホーム
-            </a>
-            <a
-              href="#about"
-              onClick={() => setShowMenu(false)}
-              className="block text-4xl hover:text-[#64ffda] transition-colors"
-            >
-              自己紹介
-            </a>
-            <a
-              href="#skills"
-              onClick={() => setShowMenu(false)}
-              className="block text-4xl hover:text-[#64ffda] transition-colors"
-            >
-              スキル
-            </a>
-            <a
-              href="#contact"
-              onClick={() => setShowMenu(false)}
-              className="block text-4xl hover:text-[#64ffda] transition-colors"
-            >
-              連絡先
-            </a>
-          </div>
-        </div>
-      )}
+    <script>
+        const cardsData = [
+            { id: 1, name: 'Naphthalene' },
+            { id: 2, name: 'Anthracene' },
+            { id: 3, name: 'Phenanthrene' },
+            { id: 4, name: 'Pyrene' },
+            { id: 5, name: 'Perylene' },
+            { id: 6, name: 'Triphenylene' },
+        ];
 
-      <section id="home" className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-5xl md:text-7xl font-bold mb-4">
-            <span className="text-[#64ffda]">こんにちは</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-400">
-            クリエイティブデベロッパー
-          </p>
-        </div>
-      </section>
-      <section id="about" className="min-h-screen flex items-center py-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">自己紹介</h2>
-          <p className="text-gray-400 leading-relaxed">
-            ここにあなたの自己紹介文を入れてください。あなたの経歴、興味、目標などについて書くことができます。
-          </p>
-        </div>
-      </section>
-      <section
-        id="skills"
-        className="min-h-screen bg-[#0f0f0f] flex items-center py-20 px-4"
-      >
-        <div className="max-w-4xl mx-auto w-full">
-          <h2 className="text-3xl md:text-4xl font-bold mb-12">スキル</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-            <div className="text-center p-6 bg-[#1a1a1a] rounded-lg hover:transform hover:scale-105 transition-transform">
-              <i className="fab fa-html5 text-4xl text-[#64ffda] mb-4"></i>
-              <h3>HTML/CSS</h3>
-            </div>
-            <div className="text-center p-6 bg-[#1a1a1a] rounded-lg hover:transform hover:scale-105 transition-transform">
-              <i className="fab fa-js text-4xl text-[#64ffda] mb-4"></i>
-              <h3>JavaScript</h3>
-            </div>
-            <div className="text-center p-6 bg-[#1a1a1a] rounded-lg hover:transform hover:scale-105 transition-transform">
-              <i className="fab fa-react text-4xl text-[#64ffda] mb-4"></i>
-              <h3>React</h3>
-            </div>
-            <div className="text-center p-6 bg-[#1a1a1a] rounded-lg hover:transform hover:scale-105 transition-transform">
-              <i className="fab fa-python text-4xl text-[#64ffda] mb-4"></i>
-              <h3>Python</h3>
-            </div>
-            <div className="text-center p-6 bg-[#1a1a1a] rounded-lg hover:transform hover:scale-105 transition-transform">
-              <i className="fab fa-discord text-4xl text-[#64ffda] mb-4"></i>
-              <h3>discord.py</h3>
-            </div>
-            <div className="text-center p-6 bg-[#1a1a1a] rounded-lg hover:transform hover:scale-105 transition-transform">
-              <i className="fab fa-discord text-4xl text-[#64ffda] mb-4"></i>
-              <h3>discord.js</h3>
-            </div>
-          </div>
-        </div>
-      </section>
+        // ダブルペアを作成してシャッフル
+        let cards = [...cardsData, ...cardsData]
+            .sort(() => Math.random() - 0.5);
 
-      <section className="min-h-screen bg-[#0a0a0a] flex items-center py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">Discord Bot</h2>
-          <p className="text-gray-400 mb-8">
-            私が作成したDiscord Botをチェックしてください！
-          </p>
-          <a
-            href="https://your-discord-bot-website.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-6 py-3 bg-[#64ffda] text-[#0a0a0a] rounded-lg font-bold hover:bg-[#4fd1b3] transition-colors"
-          >
-            <i className="fab fa-discord mr-2"></i>
-            Botを追加する
-          </a>
-        </div>
-      </section>
+        const gameBoard = document.getElementById('game-board');
+        let flippedCards = [];
+        let matchedCount = 0;
 
-      <section
-        id="contact"
-        className="min-h-screen flex items-center py-20 px-4"
-      >
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-8">連絡先</h2>
-          <div className="flex justify-center space-x-8 text-3xl">
-            <a
-              href={socialLinks.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[#64ffda] transition-colors transform hover:scale-110"
-            >
-              <i className="fab fa-github"></i>
-            </a>
-            <a
-              href={socialLinks.discord}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[#64ffda] transition-colors transform hover:scale-110"
-            >
-              <i className="fab fa-discord"></i>
-            </a>
-            <a
-              href={socialLinks.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-[#64ffda] transition-colors transform hover:scale-110"
-            >
-              <i className="fab fa-linkedin"></i>
-            </a>
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
+        // カードを生成
+        cards.forEach((card, index) => {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'card';
+            cardElement.dataset.id = card.id;
+            cardElement.dataset.name = card.name;
+            cardElement.innerHTML = '？';
+            cardElement.addEventListener('click', () => flipCard(cardElement));
+            gameBoard.appendChild(cardElement);
+        });
 
+        // カードをめくる
+        function flipCard(cardElement) {
+            if (cardElement.classList.contains('flipped') || cardElement.classList.contains('matched') || flippedCards.length === 2) {
+                return;
+            }
 
+            cardElement.classList.add('flipped');
+            cardElement.innerHTML = cardElement.dataset.name;
+            flippedCards.push(cardElement);
+
+            if (flippedCards.length === 2) {
+                checkMatch();
+            }
+        }
+
+        // 一致を確認
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.dataset.id === card2.dataset.id) {
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                matchedCount += 2;
+
+                if (matchedCount === cards.length) {
+                    alert('全てのカードを揃えました！おめでとう！');
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    card1.innerHTML = '？';
+                    card2.innerHTML = '？';
+                }, 1000);
+            }
+
+            flippedCards = [];
+        }
+    </script>
+</body>
+</html>
